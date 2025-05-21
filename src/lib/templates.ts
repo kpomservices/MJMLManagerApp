@@ -1,137 +1,103 @@
-
 export interface Template {
   id: string;
   title: string;
   description: string;
   content: string;
+  mjmlUrl: string;
   createdAt: string;
   updatedAt: string;
   thumbnailUrl?: string;
 }
 
-// Sample templates
-const defaultTemplates: Template[] = [
-  {
-    id: '1',
-    title: 'Welcome Email',
-    description: 'A welcome email for new users',
-    content: `<mjml>
-  <mj-body>
-    <mj-section>
-      <mj-column>
-        <mj-text font-size="20px" color="#F45E43" font-family="helvetica">Welcome to Our Service</mj-text>
-        <mj-text font-size="16px">Thank you for signing up! We're excited to have you on board.</mj-text>
-        <mj-button background-color="#F45E43" href="https://example.com">Get Started</mj-button>
-      </mj-column>
-    </mj-section>
-  </mj-body>
-</mjml>`,
-    createdAt: '2023-01-01T12:00:00Z',
-    updatedAt: '2023-01-01T12:00:00Z',
-    thumbnailUrl: 'https://picsum.photos/seed/welcome/300/200'
-  },
-  {
-    id: '2',
-    title: 'Newsletter',
-    description: 'Monthly newsletter template',
-    content: `<mjml>
-  <mj-body>
-    <mj-section background-color="#f0f0f0">
-      <mj-column>
-        <mj-text font-size="20px" font-family="helvetica">Monthly Newsletter</mj-text>
-        <mj-text font-size="16px">Here's what's new this month...</mj-text>
-        <mj-divider border-color="#F45E43"></mj-divider>
-        <mj-text>Read our latest articles and updates.</mj-text>
-      </mj-column>
-    </mj-section>
-  </mj-body>
-</mjml>`,
-    createdAt: '2023-02-01T12:00:00Z',
-    updatedAt: '2023-02-01T12:00:00Z',
-    thumbnailUrl: 'https://picsum.photos/seed/newsletter/300/200'
-  },
-  {
-    id: '3',
-    title: 'Promo',
-    description: 'Promotional email template',
-    content: `<mjml>
-  <mj-body>
-    <mj-section background-color="#fceb9f">
-      <mj-column>
-        <mj-text font-size="24px" font-weight="bold" font-family="helvetica">SPECIAL OFFER!</mj-text>
-        <mj-text font-size="18px">Get 25% off your next purchase</mj-text>
-        <mj-button background-color="#F45E43" href="https://example.com/promo">Shop Now</mj-button>
-      </mj-column>
-    </mj-section>
-  </mj-body>
-</mjml>`,
-    createdAt: '2023-03-01T12:00:00Z',
-    updatedAt: '2023-03-01T12:00:00Z',
-    thumbnailUrl: 'https://picsum.photos/seed/promo/300/200'
-  }
-];
-
-// Template storage functions using localStorage
-export const getTemplates = (): Template[] => {
+export const getTemplates = async (): Promise<Template[]> => {
   try {
-    const templates = localStorage.getItem('mjmlTemplates');
-    if (templates) {
-      return JSON.parse(templates);
-    }
-    
-    // Initialize with default templates if none exist
-    localStorage.setItem('mjmlTemplates', JSON.stringify(defaultTemplates));
-    return defaultTemplates;
+    const response = await fetch('https://email.diybuilder.in/mjmlwebservice/getTemplates.php');
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+    const data = await response.json();
+    //console.log(data)
+    return data as Template[];
   } catch (error) {
     console.error('Error fetching templates:', error);
-    return defaultTemplates;
+    return [];
   }
 };
 
-export const getTemplate = (id: string): Template | undefined => {
-  const templates = getTemplates();
+export const getTemplate = async (id: string): Promise<Template | undefined> => {
+  const templates = await getTemplates();
   return templates.find(template => template.id === id);
 };
 
-export const saveTemplate = (template: Template): Template => {
-  const templates = getTemplates();
-  const now = new Date().toISOString();
+export const saveTemplate = async (template: Template): Promise<Template | null> => {
+    try {
+      const method = template.id ? 'PUT' : 'POST';
   
-  if (template.id && templates.some(t => t.id === template.id)) {
-    // Update existing template
-    const updatedTemplates = templates.map(t => {
-      if (t.id === template.id) {
-        return { ...template, updatedAt: now };
+      const response = await fetch('https://email.diybuilder.in/mjmlwebservice/cards.php', {
+        method,
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(template)
+      });
+  
+      if (!response.ok) {
+        throw new Error(`Failed to save template: ${response.statusText}`);
       }
-      return t;
-    });
-    localStorage.setItem('mjmlTemplates', JSON.stringify(updatedTemplates));
-    return { ...template, updatedAt: now };
-  } else {
-    // Create new template
-    const newTemplate = {
-      ...template,
-      id: String(Date.now()),
-      createdAt: now,
-      updatedAt: now
-    };
-    localStorage.setItem('mjmlTemplates', JSON.stringify([newTemplate, ...templates]));
-    return newTemplate;
-  }
-};
+  
+      const savedTemplate = await response.json();
+      return savedTemplate as Template;
+    } catch (error) {
+      console.error('Error saving template:', error);
+      return null;
+    }
+  };
 
-export const deleteTemplate = (id: string): void => {
-  const templates = getTemplates();
-  const updatedTemplates = templates.filter(template => template.id !== id);
-  localStorage.setItem('mjmlTemplates', JSON.stringify(updatedTemplates));
-};
+  export const copyTemplate = async (id: string): Promise<Template | null> => {
+    try {
+      const response = await fetch(`https://email.diybuilder.in/mjmlwebservice/duplicateTemplate.php?id=${encodeURIComponent(id)}`, {
+        method: 'POST'
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to duplicate template');
+      }
+  
+      const data = await response.json();
+      return data as Template;
+    } catch (error) {
+      console.error('Error duplicating template:', error);
+      return null;
+    }
+  };
+  
+  
 
-export const createNewTemplate = (): Template => {
-  return {
-    id: '',
-    title: 'New Template',
-    description: 'Template description',
-    content: `<mjml>
+
+  export const deleteTemplate = async (id: string): Promise<boolean> => {
+    try {
+      const response = await fetch(`https://email.diybuilder.in/mjmlwebservice/deleteTemplate.php?id=${encodeURIComponent(id)}`, {
+        method: 'DELETE'
+      });
+  
+      if (!response.ok) {
+        throw new Error(`Failed to delete template: ${response.statusText}`);
+      }
+  
+      return true;
+    } catch (error) {
+      console.error('Error deleting template:', error);
+      return false;
+    }
+  };
+  
+  
+
+export const createNewTemplate = (): Template => ({
+  id: '',
+  title: 'New Template',
+  description: 'Template description',
+  mjmlUrl:'',
+  content: `<mjml>
   <mj-body>
     <mj-section>
       <mj-column>
@@ -141,7 +107,6 @@ export const createNewTemplate = (): Template => {
     </mj-section>
   </mj-body>
 </mjml>`,
-    createdAt: '',
-    updatedAt: ''
-  };
-};
+  createdAt: '',
+  updatedAt: ''
+});

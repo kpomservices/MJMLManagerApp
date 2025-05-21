@@ -1,13 +1,14 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Save, ArrowLeft, Eye, Code } from "lucide-react";
+import { Save, ArrowLeft, Eye, Code, Download  } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface EditorToolbarProps {
   title: string;
   onTitleChange: (value: string) => void;
   onSave: () => void;
+  onDownload: () => void;
   onTogglePreview: () => void;
   isPreviewMode: boolean;
   isSaving: boolean;
@@ -16,7 +17,8 @@ interface EditorToolbarProps {
 export function EditorToolbar({ 
   title, 
   onTitleChange, 
-  onSave, 
+  onSave,
+  onDownload, 
   onTogglePreview, 
   isPreviewMode,
   isSaving 
@@ -63,6 +65,18 @@ export function EditorToolbar({
           <Save className="mr-2 h-4 w-4" />
           {isSaving ? "Saving..." : "Save"}
         </Button>
+        {isPreviewMode && onDownload && (
+        <Button 
+          onClick={onDownload}
+          variant="outline" 
+          size="sm"
+        >
+          <Download className="mr-2 h-4 w-4" />
+          <>
+              Download
+            </>
+        </Button>
+        )}
       </div>
     </div>
   );

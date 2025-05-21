@@ -10,22 +10,51 @@ export function MjmlPreview({ mjmlCode }: MjmlPreviewProps) {
   const [htmlOutput, setHtmlOutput] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    try {
-      // Only process if we have MJML code
-      if (mjmlCode.trim()) {
-        const { html, errors } = mjml2html(mjmlCode);
-        setHtmlOutput(html);
-        setError(errors.length > 0 ? errors[0].message : null);
-      } else {
-        setHtmlOutput("");
-        setError(null);
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to render MJML");
+  //console.log(mjmlCode)
+
+  // useEffect(() => {
+  //   try {
+  //     // Only process if we have MJML code
+  //     if (mjmlCode.trim()) {
+  //       const { html, errors } = mjml2html(mjmlCode);
+  //       setHtmlOutput(html);
+  //       setError(errors.length > 0 ? errors[0].message : null);
+  //     } else {
+  //       setHtmlOutput("");
+  //       setError(null);
+  //     }
+  //   } catch (err) {
+  //     setError(err instanceof Error ? err.message : "Failed to render MJML");
+  //     setHtmlOutput("");
+  //   }
+  // }, [mjmlCode]);
+
+
+  // React useEffect
+useEffect(() => {
+  if (!mjmlCode.trim()) {
+    setHtmlOutput("");
+    setError(null);
+    return;
+  }
+  const formData = new FormData();
+  formData.append("mjml", mjmlCode);
+
+  fetch("https://diybuilder.in/mjml-builder/mjml2htmlupdated.php", {
+    method: "POST",
+    body: formData,
+  })
+    .then(res => res.text())
+    .then(html => {
+      setHtmlOutput(html);
+      setError(null);
+    })
+    .catch(e => {
+      setError("Failed to compile MJML: " + e.message);
       setHtmlOutput("");
-    }
-  }, [mjmlCode]);
+    });
+}, [mjmlCode]);
+
 
   if (error) {
     return (

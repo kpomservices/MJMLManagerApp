@@ -2,7 +2,8 @@
 import { useEffect, useState } from "react";
 import { AppSidebar } from "@/components/AppSidebar";
 import { TemplateCard } from "@/components/TemplateCard";
-import { getTemplates, deleteTemplate, Template } from "@/lib/templates";
+// import { getTemplates, deleteTemplate, Template } from "@/lib/templates";
+import { getTemplates, deleteTemplate, copyTemplate, Template } from "@/lib/templates";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
@@ -12,21 +13,50 @@ const Dashboard = () => {
   const [templates, setTemplates] = useState<Template[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    // Fetch templates with a small delay to simulate loading
-    setIsLoading(true);
-    const timer = setTimeout(() => {
-      setTemplates(getTemplates());
-      setIsLoading(false);
-    }, 500);
+  // useEffect(() => {
+  //   // Fetch templates with a small delay to simulate loading
+  //   setIsLoading(true);
+  //   const timer = setTimeout(() => {
+  //     setTemplates(getTemplates());
+  //     setIsLoading(false);
+  //   }, 500);
 
+  //   return () => clearTimeout(timer);
+  // }, []);
+
+  useEffect(() => {
+    setIsLoading(true);
+  
+    const timer = setTimeout(() => {
+      // define async function inside the timer callback
+      async function fetchAndSet() {
+        try {
+          const templates = await getTemplates();
+          setTemplates(templates);
+        } catch (error) {
+          console.error(error);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+      fetchAndSet();
+    }, 500);
+  
     return () => clearTimeout(timer);
   }, []);
+  
 
   const handleDelete = (id: string) => {
     deleteTemplate(id);
     setTemplates(prev => prev.filter(template => template.id !== id));
   };
+
+  const handleDuplicate = async (id: string) => {
+    await copyTemplate(id); // Wait for duplication to finish
+    const refreshedTemplates = await getTemplates(); // Fetch the updated list
+    setTemplates(refreshedTemplates); // Refresh UI
+  };
+
 
   return (
     <div className="flex min-h-screen w-full">
@@ -63,6 +93,7 @@ const Dashboard = () => {
                   updatedAt={new Date(template.updatedAt).toLocaleDateString()}
                   thumbnailUrl={template.thumbnailUrl}
                   onDelete={handleDelete}
+                  onDuplicate={handleDuplicate}
                 />
               ))}
             </div>

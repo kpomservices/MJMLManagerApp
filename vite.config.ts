@@ -5,9 +5,17 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
+  base: '/MJMLManager/', // ✅ This must be at the top level, not under server
   server: {
     host: "::",
     port: 8080,
+    proxy: {
+      '/admincards': {
+        target: 'https://email.diybuilder.in',
+        changeOrigin: true,
+        secure: false
+      }
+    }
   },
   plugins: [
     react(),

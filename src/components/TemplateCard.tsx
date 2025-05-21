@@ -13,22 +13,31 @@ interface TemplateCardProps {
   updatedAt: string;
   thumbnailUrl?: string;
   onDelete: (id: string) => void;
+  onDuplicate: (id: string) => void;
 }
 
-export function TemplateCard({ id, title, description, updatedAt, thumbnailUrl, onDelete }: TemplateCardProps) {
+export function TemplateCard({ id, title, description, updatedAt, thumbnailUrl, onDelete, onDuplicate }: TemplateCardProps) {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isDuplicting, setIsDuplicting] = useState(false);
+  //console.log(id)
 
   const handleEdit = () => {
+    //console.log(id)
     navigate(`/editor/${id}`);
   };
 
   const handleCopy = () => {
-    toast({
-      title: "Template copied",
-      description: "Template has been duplicated successfully.",
-    });
+    setIsDuplicting(true);
+    setTimeout(() => {
+      onDuplicate(id);
+      setIsDuplicting(false);
+      toast({
+        title: "Template copied",
+        description: "Template has been duplicated successfully.",
+      });
+    }, 500);
   };
 
   const handleDelete = () => {
@@ -62,12 +71,12 @@ export function TemplateCard({ id, title, description, updatedAt, thumbnailUrl, 
         <p className="text-xs text-gray-500">Last updated: {updatedAt}</p>
       </CardContent>
       <CardFooter className="pt-2 flex justify-between">
-        <Button variant="outline" size="sm" onClick={handleEdit}>
+        <Button variant="outline" size="sm" disabled={isDuplicting} onClick={handleEdit}>
           <Edit className="mr-2 h-4 w-4" />
           Edit
         </Button>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={handleCopy}>
+          <Button variant="outline" size="sm" disabled={isDuplicting} onClick={handleCopy}>
             <Copy className="h-4 w-4" />
             <span className="sr-only">Copy</span>
           </Button>

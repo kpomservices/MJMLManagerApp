@@ -4,10 +4,11 @@ import { Textarea } from "@/components/ui/textarea";
 
 interface CodeEditorProps {
   value: string;
+  id?: string; // 👈 Accept id as prop
   onChange: (value: string) => void;
 }
 
-export function CodeEditor({ value, onChange }: CodeEditorProps) {
+export function CodeEditor({ value, onChange, id }: CodeEditorProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -38,14 +39,20 @@ export function CodeEditor({ value, onChange }: CodeEditorProps) {
 
   return (
     <div className="h-full w-full bg-editor p-4">
-      <Textarea
+      <iframe
+        src={`https://email.diybuilder.in/index.php?tempname=${id}`}
+        title="MJML Editor"
+        className="h-full w-full bg-white border border-editor-border"
+      >
+      </iframe>
+      {/* <Textarea
         ref={textareaRef}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         className="h-full w-full font-mono text-sm bg-white border border-editor-border p-4 resize-none focus-visible:ring-1"
         placeholder="Type your MJML code here..."
         spellCheck={false}
-      />
+      /> */}
     </div>
   );
 }
