@@ -24,6 +24,8 @@ const Editor = () => {
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const editorRef = useRef<MjmlEditorHandles>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+
   
 
     useEffect(() => {
@@ -121,6 +123,7 @@ const Editor = () => {
           onTogglePreview={togglePreview}
           isPreviewMode={isPreviewMode}
           isSaving={isSaving}
+          iframeRef={iframeRef}
         />
         
         <div className="flex-1 flex overflow-hidden">
@@ -142,7 +145,9 @@ const Editor = () => {
             <div className="h-full border-r" style={{ width: "100%" }}>
               <div className="h-full w-full bg-editor p-4">
                 <iframe
-                  src={`https://email.diybuilder.in/index.php?tempname=${id}`}
+                  ref={iframeRef}
+                  src={`https://email.diybuilder.in/iframeindex.php?tempname=${id}`}
+                  //src={`http://localhost:8888/MJMLSimpleDnD/index.php`}
                   title="MJML Editor"
                   className="h-full w-full bg-white border border-editor-border"
                 >

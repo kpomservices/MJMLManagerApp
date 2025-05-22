@@ -76,11 +76,11 @@ export function TemplateCard({ id, title, description, updatedAt, thumbnailUrl, 
           Edit
         </Button>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" disabled={isDuplicting} onClick={handleCopy}>
+          {/* <Button variant="outline" size="sm" disabled={isDuplicting} onClick={handleCopy}>
             <Copy className="h-4 w-4" />
             <span className="sr-only">Copy</span>
-          </Button>
-          <Button 
+          </Button> */}
+          {/* <Button 
             variant="outline" 
             size="sm" 
             onClick={handleDelete}
@@ -89,7 +89,7 @@ export function TemplateCard({ id, title, description, updatedAt, thumbnailUrl, 
           >
             <Trash2 className="h-4 w-4" />
             <span className="sr-only">Delete</span>
-          </Button>
+          </Button> */}
         </div>
       </CardFooter>
     </Card>

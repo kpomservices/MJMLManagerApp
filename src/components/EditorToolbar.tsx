@@ -1,8 +1,10 @@
 
+import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Save, ArrowLeft, Eye, Code, Download  } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 interface EditorToolbarProps {
   title: string;
@@ -12,6 +14,7 @@ interface EditorToolbarProps {
   onTogglePreview: () => void;
   isPreviewMode: boolean;
   isSaving: boolean;
+  iframeRef: React.RefObject<HTMLIFrameElement>;
 }
 
 export function EditorToolbar({ 
@@ -21,13 +24,58 @@ export function EditorToolbar({
   onDownload, 
   onTogglePreview, 
   isPreviewMode,
-  isSaving 
+  isSaving,
+  iframeRef 
 }: EditorToolbarProps) {
   const navigate = useNavigate();
 
+  // const iframeDownloadFunction = () => {
+  //   iframeRef.current?.contentWindow?.postMessage({ type: "DOWNLOAD_MJML" }, "*");
+  // };
+
+  // const iframeSaveFunction = () => {
+  //   iframeRef.current?.contentWindow?.postMessage({ type: "SAVE_MJML" }, "*");
+  // };
+
+  const callIframefunctions = (functionName: string) => {
+    
+    iframeRef.current?.contentWindow?.postMessage({ type: functionName }, "*");
+    if(functionName === 'PREVIEW_MJML') {
+      setTimeout(() => {
+        onTogglePreview();
+      }, 3000); // delay in milliseconds, e.g., 1000ms = 1 second
+    }
+  };
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+const onImportClick = () => {
+  fileInputRef.current?.click();
+};
+
+
+const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    const mjmlContent = reader.result as string;
+    iframeRef.current?.contentWindow?.postMessage(
+      { type: "IMPORT_MJML", content: mjmlContent }, 
+      "*"
+    );
+  };
+  reader.readAsText(file);
+};
+
+
+
   return (
     <div className="h-14 border-b flex items-center justify-between px-4 bg-white">
+      
       <div className="flex items-center gap-2">
+      <SidebarTrigger />
         <Button variant="ghost" size="icon" onClick={() => navigate('/')}>
           <ArrowLeft className="h-4 w-4" />
         </Button>
@@ -43,7 +91,8 @@ export function EditorToolbar({
         <Button 
           variant="outline" 
           size="sm" 
-          onClick={onTogglePreview}
+          onClick={() => callIframefunctions("PREVIEW_MJML")}
+          // onClick={onTogglePreview}
         >
           {isPreviewMode ? (
             <>
@@ -58,16 +107,31 @@ export function EditorToolbar({
           )}
         </Button>
         <Button 
-          onClick={onSave}
+          // onClick={onSave}
+          onClick={() => callIframefunctions("SAVE_MJML")}
           disabled={isSaving}
           size="sm"
+          
         >
           <Save className="mr-2 h-4 w-4" />
           {isSaving ? "Saving..." : "Save"}
         </Button>
-        {isPreviewMode && onDownload && (
+        {/* {isPreviewMode && onDownload && ( */}
         <Button 
-          onClick={onDownload}
+          // onClick={onDownload}
+          onClick={onImportClick}
+          variant="outline" 
+          size="sm"
+        >
+          <Download className="mr-2 h-4 w-4" />
+          <>
+              Import MJML
+            </>
+        </Button>
+        <input ref={fileInputRef} type="file" style={{ display: 'none' }} onChange={onFileChange} />
+        <Button 
+          // onClick={onDownload}
+          onClick={() => callIframefunctions("DOWNLOAD_MJML")}
           variant="outline" 
           size="sm"
         >
@@ -76,7 +140,7 @@ export function EditorToolbar({
               Download
             </>
         </Button>
-        )}
+        {/* )} */}
       </div>
     </div>
   );

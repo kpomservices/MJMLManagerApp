@@ -21,7 +21,8 @@ export const MjmlEditor = forwardRef<MjmlEditorHandles, MjmlEditorProps>(
     }));
 
     useEffect(() => {
-      fetchMjmlContent();
+      //fetchMjmlContent();
+      fetchMjml();
 
       const handleTabKey = (e: KeyboardEvent) => {
         if (e.key === "Tab" && document.activeElement === textareaRef.current) {
@@ -44,24 +45,44 @@ export const MjmlEditor = forwardRef<MjmlEditorHandles, MjmlEditorProps>(
       return () => {
         document.removeEventListener("keydown", handleTabKey);
       };
+      
+
     }, [mjmlUrl]);
 
-    const fetchMjmlContent = async () => {
+    // const fetchMjmlContent = async () => {
+    //   try {
+    //     const pathOnly = new URL(mjmlUrl).pathname;
+    //     const response = await fetch(pathOnly);
+    //     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+    //     const mjmlText = await response.text();
+    //     const cleanedMJML = mjmlText
+    //       .replace(/\\(["/n])/g, (m, p1) => (p1 === "n" ? "\n" : p1))
+    //       .trim()
+    //       .replace(/^"|"$/g, "");
+
+    //     setMJMLvalue(cleanedMJML);
+    //     onChange(cleanedMJML);
+    //   } catch (error) {
+    //     console.error("Failed to fetch MJML content:", error);
+    //   }
+    // };
+
+    const fetchMjml = async () => {
       try {
-        const pathOnly = new URL(mjmlUrl).pathname;
-        const response = await fetch(pathOnly);
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const response = await fetch("https://email.diybuilder.in/service/mjml-proxy.php");
 
-        const mjmlText = await response.text();
-        const cleanedMJML = mjmlText
-          .replace(/\\(["/n])/g, (m, p1) => (p1 === "n" ? "\n" : p1))
-          .trim()
-          .replace(/^"|"$/g, "");
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
-        setMJMLvalue(cleanedMJML);
-        onChange(cleanedMJML);
-      } catch (error) {
-        console.error("Failed to fetch MJML content:", error);
+        const text = await response.text();
+        console.log(text)
+        setMJMLvalue(text);
+        onChange(text);
+      } catch (err: any) {
+        console.error("Failed to load MJML:", err);
+        //setError(err.message || "Unknown error");
       }
     };
 
