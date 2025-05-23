@@ -2,6 +2,7 @@ import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { VariantProps, cva } from "class-variance-authority"
 import { PanelLeft } from "lucide-react"
+import { useLocation } from "react-router-dom";
 
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
@@ -36,14 +37,33 @@ type SidebarContext = {
 
 const SidebarContext = React.createContext<SidebarContext | null>(null)
 
+// function useSidebar() {
+//   const context = React.useContext(SidebarContext)
+//   const location = useLocation();
+//   console.log(context)
+//   if (!context) {
+//     throw new Error("useSidebar must be used within a SidebarProvider.")
+//   }
+
 function useSidebar() {
-  const context = React.useContext(SidebarContext)
+  const context = React.useContext(SidebarContext);
   if (!context) {
-    throw new Error("useSidebar must be used within a SidebarProvider.")
+    throw new Error("useSidebar must be used within a SidebarProvider.");
   }
 
-  return context
+  const location = useLocation();
+  const isEditorRoute = location.pathname.includes("/editor");
+
+  if (isEditorRoute) {
+    return {
+      ...context,
+      state: "collapsed",
+    };
+  }
+
+  return context;
 }
+
 
 const SidebarProvider = React.forwardRef<
   HTMLDivElement,
@@ -75,6 +95,7 @@ const SidebarProvider = React.forwardRef<
     const setOpen = React.useCallback(
       (value: boolean | ((value: boolean) => boolean)) => {
         const openState = typeof value === "function" ? value(open) : value
+        //console.log(openState)
         if (setOpenProp) {
           setOpenProp(openState)
         } else {

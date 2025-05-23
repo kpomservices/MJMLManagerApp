@@ -70,19 +70,18 @@ export const MjmlEditor = forwardRef<MjmlEditorHandles, MjmlEditorProps>(
 
     const fetchMjml = async () => {
       try {
-        const response = await fetch("https://email.diybuilder.in/service/mjml-proxy.php");
+        const baseUrl = import.meta.env.VITE_API_URL;
+        const response = await fetch(`${baseUrl}/service/mjml-proxy.php`);
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         const text = await response.text();
-        console.log(text)
         setMJMLvalue(text);
         onChange(text);
       } catch (err: any) {
         console.error("Failed to load MJML:", err);
-        //setError(err.message || "Unknown error");
       }
     };
 

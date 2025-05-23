@@ -1,8 +1,9 @@
 
 import { useRef } from "react";
+import { useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Save, ArrowLeft, Eye, Code, Download  } from "lucide-react";
+import { Save, ArrowLeft, Eye, Code, Download,Smartphone, Monitor  } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
@@ -37,8 +38,11 @@ export function EditorToolbar({
   //   iframeRef.current?.contentWindow?.postMessage({ type: "SAVE_MJML" }, "*");
   // };
 
+  const location = useLocation();
+  const isEditor = location.pathname.includes("/editor");
+
   const callIframefunctions = (functionName: string) => {
-    
+
     iframeRef.current?.contentWindow?.postMessage({ type: functionName }, "*");
     if(functionName === 'PREVIEW_MJML') {
       setTimeout(() => {
@@ -75,7 +79,7 @@ const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     <div className="h-14 border-b flex items-center justify-between px-4 bg-white">
       
       <div className="flex items-center gap-2">
-      <SidebarTrigger />
+      {!isEditor && <SidebarTrigger />}
         <Button variant="ghost" size="icon" onClick={() => navigate('/')}>
           <ArrowLeft className="h-4 w-4" />
         </Button>
@@ -106,6 +110,7 @@ const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             </>
           )}
         </Button>
+        {!isPreviewMode && (
         <Button 
           // onClick={onSave}
           onClick={() => callIframefunctions("SAVE_MJML")}
@@ -116,9 +121,9 @@ const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
           <Save className="mr-2 h-4 w-4" />
           {isSaving ? "Saving..." : "Save"}
         </Button>
+        )}
         {/* {isPreviewMode && onDownload && ( */}
         <Button 
-          // onClick={onDownload}
           onClick={onImportClick}
           variant="outline" 
           size="sm"
@@ -130,7 +135,6 @@ const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         </Button>
         <input ref={fileInputRef} type="file" style={{ display: 'none' }} onChange={onFileChange} />
         <Button 
-          // onClick={onDownload}
           onClick={() => callIframefunctions("DOWNLOAD_MJML")}
           variant="outline" 
           size="sm"
@@ -140,7 +144,38 @@ const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
               Download
             </>
         </Button>
-        {/* )} */}
+        {!isPreviewMode && (
+        <Button 
+          onClick={() => callIframefunctions("LOGIN_PAGE")}
+          variant="outline" 
+          size="sm"
+        >
+          <Download className="mr-2 h-4 w-4" />
+          <>
+              Login
+            </>
+        </Button>
+        )}
+        {isPreviewMode && (
+          <>
+            <Button 
+              variant="outline" 
+              size="sm"
+            >
+              <Smartphone className="mr-2 h-4 w-4" />
+              Mobile
+            </Button>
+
+            <Button 
+              variant="outline" 
+              size="sm"
+            >
+              <Monitor className="mr-2 h-4 w-4" />
+              Desktop
+            </Button>
+          </>
+        )}
+
       </div>
     </div>
   );

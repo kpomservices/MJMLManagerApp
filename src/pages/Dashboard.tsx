@@ -57,6 +57,8 @@ const Dashboard = () => {
     setTemplates(refreshedTemplates); // Refresh UI
   };
 
+  
+
 
   return (
     <div className="flex min-h-screen w-full">

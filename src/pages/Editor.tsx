@@ -25,7 +25,10 @@ const Editor = () => {
   const [isSaving, setIsSaving] = useState(false);
   const editorRef = useRef<MjmlEditorHandles>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
-
+  const baseUrl = import.meta.env.VITE_API_URL;
+  const iframeSrc = id
+  ? `${baseUrl}/iframeindex.php?tempname=${id}`
+  : `${baseUrl}/iframeindex.php`;
   
 
     useEffect(() => {
@@ -146,14 +149,13 @@ const Editor = () => {
               <div className="h-full w-full bg-editor p-4">
                 <iframe
                   ref={iframeRef}
-                  src={`https://email.diybuilder.in/iframeindex.php?tempname=${id}`}
+                  src={iframeSrc}
                   //src={`http://localhost:8888/MJMLSimpleDnD/index.php`}
                   title="MJML Editor"
                   className="h-full w-full bg-white border border-editor-border"
                 >
                 </iframe>
               </div>
-              {/* <CodeEditor value={template.content} id={id} onChange={handleContentChange} /> */}
             </div>
           )}
 

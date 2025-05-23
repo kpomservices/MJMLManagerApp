@@ -9,13 +9,17 @@ export interface Template {
   thumbnailUrl?: string;
 }
 
+const baseUrl = import.meta.env.VITE_API_URL;
+
 export const getTemplates = async (): Promise<Template[]> => {
   try {
-    const response = await fetch('https://email.diybuilder.in/mjmlwebservice/getTemplates.php');
+    console.log(baseUrl)
+    //const response = await fetch('https://email.diybuilder.in/mjmlwebservice/getTemplates.php');
+    const response = await fetch(`${baseUrl}/service/getTemplates.php`);
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
     const data = await response.json();
-    //console.log(data)
+    console.log(data)
     return data as Template[];
   } catch (error) {
     console.error('Error fetching templates:', error);
@@ -31,8 +35,7 @@ export const getTemplate = async (id: string): Promise<Template | undefined> => 
 export const saveTemplate = async (template: Template): Promise<Template | null> => {
     try {
       const method = template.id ? 'PUT' : 'POST';
-  
-      const response = await fetch('https://email.diybuilder.in/mjmlwebservice/cards.php', {
+      const response = await fetch(`${baseUrl}/service/cards.php`, {
         method,
         headers: {
           'Content-Type': 'application/json'
@@ -54,7 +57,7 @@ export const saveTemplate = async (template: Template): Promise<Template | null>
 
   export const copyTemplate = async (id: string): Promise<Template | null> => {
     try {
-      const response = await fetch(`https://email.diybuilder.in/mjmlwebservice/duplicateTemplate.php?id=${encodeURIComponent(id)}`, {
+      const response = await fetch(`${baseUrl}/service/duplicateTemplate.php?id=${encodeURIComponent(id)}`, {
         method: 'POST'
       });
   
@@ -75,7 +78,7 @@ export const saveTemplate = async (template: Template): Promise<Template | null>
 
   export const deleteTemplate = async (id: string): Promise<boolean> => {
     try {
-      const response = await fetch(`https://email.diybuilder.in/mjmlwebservice/deleteTemplate.php?id=${encodeURIComponent(id)}`, {
+      const response = await fetch(`${baseUrl}/service/deleteTemplate.php?id=${encodeURIComponent(id)}`, {
         method: 'DELETE'
       });
   
